@@ -1,4 +1,5 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "module": "NodeNext",
     "target": "ES2020", // for top-level await expressions to work

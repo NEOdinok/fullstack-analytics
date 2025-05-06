@@ -16,7 +16,8 @@ build/
 
 # Environment files
 .env
-.env.*  # for variants like .env.local, .env.production
+.env.local
+.env.*  
 
 # Logs
 npm-debug.log*
