@@ -4,6 +4,8 @@ import type { RawEvent } from "../../types";
 const flushIntervalMs = 1000;
 const eventBufferSize = 3;
 
+const buffer: Array<RawEvent> = [];
+
 interface Tracker {
   track(event: string, ...tags: string[]): void;
 }
@@ -16,9 +18,14 @@ export const tracker: Tracker = {
   },
 };
 
-// --- внутренняя кухня ------------------------------------------
+declare global {
+  interface Window {
+    tracker: Tracker;
+  }
+}
+window.tracker = tracker;
 
-const buffer: Array<RawEvent> = [];
+// --- внутренняя кухня ------------------------------------------
 
 let lastFlush = 0;
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
@@ -36,18 +43,26 @@ function buildEvent(event: string, tags: string[]): RawEvent {
 }
 
 function scheduleFlush() {
-  const currentTime = Date.now();
-  const bufferFilled = buffer.length >= eventBufferSize;
-  const flushIntervalPassed = currentTime - lastFlush > flushIntervalMs;
+  const now = Date.now();
+  const timeSinceLast = now - lastFlush;
 
-  const shouldFlush = bufferFilled || flushIntervalPassed;
+  // 1. буфер заполнен – шлём сразу
+  if (buffer.length >= eventBufferSize) {
+    flushSoon();
+    return;
+  }
 
-  if (shouldFlush) flushSoon();
-  else if (!flushTimer) flushSoon(1000 - (currentTime - lastFlush));
+  // 2. ждём, чтобы не слать меньше 3 событий чаще, чем раз в секунду
+  if (!flushTimer) {
+    const delay = Math.max(flushIntervalMs - timeSinceLast, 0);
+    flushSoon(delay); // <= 1 с
+  }
 }
 
 function flushSoon(delay: number = 0) {
   if (flushTimer) clearTimeout(flushTimer);
+
+  console.log("flush with delay:", delay);
 
   flushTimer = setTimeout(flush, delay);
 }
