@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "target": "ES2020", // for top-level await expressions to work
+    "moduleResolution": "NodeNext",
+
+    "esModuleInterop": true, // allow ECMAScript Modules (ESM)
+    "resolveJsonModule": true
+  },
+  "type": "module"
+}
