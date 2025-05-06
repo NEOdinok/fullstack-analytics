@@ -1,7 +1,13 @@
-export type RawEvent = {
-  event: string;
-  tags: string[];
-  url: string;
-  title: string;
-  ts: number; // seconds since Unix epoch
-};
+import { z } from "zod";
+
+export const RawEventSchema = z.object({
+  event: z.string(),
+  tags: z.array(z.string()),
+  url: z.string(),
+  title: z.string(),
+  ts: z.number(),
+});
+
+export type RawEvent = z.infer<typeof RawEventSchema>;
+
+export const RawEventArraySchema = z.array(RawEventSchema);

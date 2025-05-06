@@ -1,18 +1,16 @@
-// import "dotenv/config";
 import Fastify from "fastify";
 import fastifyMongo from "@fastify/mongodb";
 import path from "node:path";
 import fs from "node:fs/promises";
 import http from "node:http";
-import type { RawEvent } from "../../types.js";
+import { type RawEvent, RawEventSchema, RawEventArraySchema } from "@/types";
 import { config } from "dotenv";
-import { fileURLToPath } from "node:url";
 import fastifyCors from "@fastify/cors";
 
 config({ path: path.join(__dirname, "../../.env") });
 
-const PORT_STATIC = 50000;
-const PORT_API = 8888;
+const portStatic = Number(process.env.PORT_STATIC);
+const portApi = Number(process.env.PORT_API);
 
 const staticDir = path.resolve(__dirname, "../static"); // static html pages
 
@@ -30,33 +28,27 @@ api.get("/tracker", (_, reply) => {
   reply.type("application/javascript").sendFile("tracker.js");
 });
 
-api.post<{ Body: RawEvent[] }>("/track", async (request, reply) => {
-  const events = request.body;
+api.post("/track", async (request, reply) => {
+  const parseResult = RawEventArraySchema.safeParse(request.body);
 
-  if (!Array.isArray(events) || !events.every(validateEvent)) {
-    reply.code(422).send({ error: "Validation error" });
+  if (!parseResult.success) {
+    reply
+      .code(422)
+      .send({ error: "Validation error", details: parseResult.error.format() });
     return;
   }
 
+  const events = parseResult.data;
+
   reply.code(200).send({ ok: true });
 
-  const collection = api.mongo.db!.collection<RawEvent>("tracks");
+  const collection = api.mongo.db!.collection("tracks");
   try {
     await collection.insertMany(events, { ordered: false });
   } catch (err) {
     api.log.error({ err }, "insertMany failed");
   }
 });
-
-function validateEvent(e: any): e is RawEvent {
-  return (
-    typeof e.event === "string" &&
-    Array.isArray(e.tags) &&
-    typeof e.url === "string" &&
-    typeof e.title === "string" &&
-    typeof e.ts === "number"
-  );
-}
 
 async function main() {
   await api.register(import("@fastify/static"), {
@@ -73,7 +65,7 @@ async function main() {
     },
   });
 
-  api.listen({ port: PORT_API }, (err, addr) => {
+  api.listen({ port: portApi }, (err, addr) => {
     if (err) {
       api.log.error(err);
       process.exit(1);
@@ -92,8 +84,8 @@ async function main() {
       res.writeHead(200, { "Content-Type": "text/html" });
       res.end(html);
     })
-    .listen(PORT_STATIC, () =>
-      console.log(`Static pages → http://localhost:${PORT_STATIC}/1.html`)
+    .listen(portStatic, () =>
+      console.log(`Static pages → http://localhost:${portStatic}/1.html`)
     );
 }
 
