@@ -1,5 +1,4 @@
-// tracker-client/src/index.ts
-import type { RawEvent } from "../../types";
+import type { RawEvent } from "@/types";
 
 const flushIntervalMs = 1000;
 const eventBufferSize = 3;
@@ -61,8 +60,6 @@ function scheduleFlush() {
 
 function flushSoon(delay: number = 0) {
   if (flushTimer) clearTimeout(flushTimer);
-
-  console.log("flush with delay:", delay);
 
   flushTimer = setTimeout(flush, delay);
 }
