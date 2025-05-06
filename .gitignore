@@ -1,4 +1,38 @@
-**/**/node_modules
-.vscode
+# macOS system files
 .DS_Store
-build
+
+# Node dependencies (pnpm creates symlinks too)
+node_modules/
+.pnpm/
+.pnpm-store/
+
+# Editor configs
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.*  # for variants like .env.local, .env.production
+
+# Logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional cache/lock files
+*.log
+*.tsbuildinfo
+
+# Local coverage results
+coverage/
+
+# Optional if you're using test snapshots
+__snapshots__/
+
+# VS Code settings
+*.code-workspace
