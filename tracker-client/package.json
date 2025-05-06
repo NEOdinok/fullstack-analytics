@@ -1,0 +1,13 @@
+{
+  "name": "tracker-client",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^6.3.5",
+    "typescript": "^5.4.0"
+  }
+}
