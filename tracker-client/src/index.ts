@@ -1,7 +1,10 @@
-import type { RawEvent } from "@/types";
+import { type RawEvent } from "@/types.js";
 
 const flushIntervalMs = 1000;
 const eventBufferSize = 3;
+
+const portApi = Number(import.meta.env.VITE_PORT_STATIC);
+const appUrl = import.meta.env.VITE_APP_URL;
 
 const buffer: Array<RawEvent> = [];
 
@@ -28,7 +31,7 @@ window.tracker = tracker;
 
 let lastFlush = 0;
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
-const ENDPOINT = "http://localhost:8888/track";
+const ENDPOINT = `${appUrl}:${portApi}/track`;
 
 function buildEvent(event: string, tags: string[]): RawEvent {
   const currentTimeSeconds = Math.floor(Date.now() / 1000);
