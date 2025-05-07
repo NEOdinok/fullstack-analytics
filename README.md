@@ -43,4 +43,20 @@ pnpm --filter backend dev
 2. **Админ-панель**: React + Recharts, собственный API `/stats`.
 3. **Анонимные пользователи**: добавляете в трекер генерацию `visitorId` (UUID в `localStorage`) и передаёте его вместе с каждым событием.
 
+### Поменял <script> в html файлах
+
+Можно было бы оставить без `.js` на конце
+
+```html
+<script src="http://localhost:8888/tracker"></script>
+```
+
+Но тогда вместо fastify плагина пришлось бы использовать отдельный роут:
+
+```js
+api.get("/tracker", (_, reply) => {
+  reply.type("application/javascript").sendFile("tracker.js");
+});
+```
+
 ---
