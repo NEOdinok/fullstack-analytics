@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "ts-node-dev --require tsconfig-paths/register --transpile-only src/server.ts"
+    "dev": "ts-node-dev --require tsconfig-paths/register --transpile-only src/index.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.1",
