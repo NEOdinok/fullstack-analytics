@@ -17,10 +17,6 @@ const trackerDist = path.resolve(__dirname, "../../tracker-client/dist");
 
 const api = Fastify({ logger: true });
 
-api.get("/tracker", (_, reply) => {
-  reply.type("application/javascript").sendFile("tracker.js");
-});
-
 api.post("/track", async (request, reply) => {
   const parseResult = RawEventArraySchema.safeParse(request.body);
 
@@ -31,9 +27,9 @@ api.post("/track", async (request, reply) => {
     return;
   }
 
-  const events = parseResult.data;
   reply.code(200).send({ ok: true });
 
+  const events = parseResult.data;
   const collection = api.mongo.db!.collection("tracks");
   await collection.insertMany(events, { ordered: false });
 });
