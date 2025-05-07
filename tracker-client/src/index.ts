@@ -27,8 +27,6 @@ declare global {
 }
 window.tracker = tracker;
 
-// --- внутренняя кухня ------------------------------------------
-
 let lastFlush = 0;
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 const ENDPOINT = `${appUrl}:${portApi}/track`;
@@ -48,16 +46,15 @@ function scheduleFlush() {
   const now = Date.now();
   const timeSinceLast = now - lastFlush;
 
-  // 1. буфер заполнен – шлём сразу
   if (buffer.length >= eventBufferSize) {
     flushSoon();
     return;
   }
 
-  // 2. ждём, чтобы не слать меньше 3 событий чаще, чем раз в секунду
   if (!flushTimer) {
-    const delay = Math.max(flushIntervalMs - timeSinceLast, 0);
-    flushSoon(delay); // <= 1 с
+    const timeLeftToFlush = Math.max(flushIntervalMs - timeSinceLast, 0);
+
+    flushSoon(timeLeftToFlush);
   }
 }
 
@@ -81,10 +78,11 @@ async function flush() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-      keepalive: true, // чтобы запрос дожил при закрытии вкладки
+      keepalive: true,
     });
-  } catch {
-    // проблема сети — вернём события в очередь и попробуем через 1 с
+  } catch (err) {
+    console.warn("Error sending analytic event. Retrying", err);
+
     buffer.unshift(...payload);
 
     flushSoon(flushIntervalMs);
