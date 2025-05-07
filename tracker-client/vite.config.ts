@@ -8,11 +8,6 @@ export default defineConfig({
       formats: ["iife"],
       fileName: () => "tracker.js",
     },
-    rollupOptions: {
-      output: {
-        globals: {},
-      },
-    },
     minify: false,
   },
 });

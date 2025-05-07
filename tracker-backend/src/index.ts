@@ -1,20 +1,18 @@
 import Fastify from "fastify";
 import { config } from "dotenv";
-import db from "./db";
-import fastifyCors from "@fastify/cors";
 import path from "node:path";
 import fs from "node:fs/promises";
 import http from "node:http";
 import { RawEventArraySchema } from "@/types";
+import dbPlugin from "./db";
+import corsPlugin from "./cors";
+import staticPlugin from "./static";
 
 config();
 
 const portStatic = Number(process.env.PORT_STATIC);
 const portApi = Number(process.env.PORT_API);
-const appUrl = process.env.APP_URL;
 const staticDir = path.resolve(__dirname, "../static");
-const trackerDist = path.resolve(__dirname, "../../tracker-client/dist");
-
 const api = Fastify({ logger: true });
 
 api.post("/track", async (request, reply) => {
@@ -35,21 +33,9 @@ api.post("/track", async (request, reply) => {
 });
 
 async function main() {
-  await api.register(db);
-
-  await api.register(import("@fastify/static"), {
-    root: trackerDist,
-    prefix: "/",
-  });
-
-  await api.register(fastifyCors, {
-    origin: (origin, cb) => {
-      const allowed = [`${appUrl}:${portStatic}`];
-
-      if (!origin || allowed.includes(origin)) cb(null, true);
-      else cb(new Error("Not allowed"), false);
-    },
-  });
+  await api.register(dbPlugin);
+  await api.register(corsPlugin);
+  await api.register(staticPlugin);
 
   api.listen({ port: portApi }, (err) => {
     if (err) throw err;
