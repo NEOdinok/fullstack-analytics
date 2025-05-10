@@ -3,8 +3,8 @@ import { type RawEvent } from "@/types.js";
 const flushIntervalMs = 1000;
 const eventBufferSize = 3;
 
-const portApi = Number(import.meta.env.VITE_PORT_STATIC);
-const appUrl = import.meta.env.VITE_APP_URL;
+const portApi = Number(import.meta.env.VITE_PORT_API ?? 8888);
+const appUrl = import.meta.env.VITE_APP_URL ?? "http://localhost";
 
 const buffer: Array<RawEvent> = [];
 
@@ -29,7 +29,7 @@ window.tracker = tracker;
 
 let lastFlush = 0;
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
-const ENDPOINT = `${appUrl}:${portApi}/track`;
+const endpoint = `${appUrl}:${portApi}/track`;
 
 function buildEvent(event: string, tags: string[]): RawEvent {
   const currentTimeSeconds = Math.floor(Date.now() / 1000);
@@ -74,7 +74,7 @@ async function flush() {
   lastFlush = Date.now();
 
   try {
-    await fetch(ENDPOINT, {
+    await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -83,15 +83,16 @@ async function flush() {
   } catch (err) {
     console.warn("Error sending analytic event. Retrying", err);
 
-    buffer.unshift(...payload);
-
-    flushSoon(flushIntervalMs);
+    setTimeout(() => {
+      buffer.unshift(...payload);
+      scheduleFlush();
+    }, flushIntervalMs);
   }
 }
 
 function trackAllBeforePageCloses() {
   window.addEventListener("beforeunload", () => {
-    if (buffer.length) navigator.sendBeacon?.(ENDPOINT, JSON.stringify(buffer));
+    if (buffer.length) navigator.sendBeacon?.(endpoint, JSON.stringify(buffer));
   });
 }
 
