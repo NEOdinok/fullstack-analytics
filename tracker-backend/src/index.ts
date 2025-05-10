@@ -10,8 +10,9 @@ import staticPlugin from "./static";
 
 config();
 
-const portStatic = Number(process.env.PORT_STATIC);
-const portApi = Number(process.env.PORT_API);
+const portStatic = Number(process.env.PORT_STATIC ?? 50000);
+const portApi = Number(process.env.PORT_API ?? 8888);
+
 const staticDir = path.resolve(__dirname, "../static");
 const api = Fastify({ logger: true });
 
@@ -27,9 +28,10 @@ api.post("/track", async (request, reply) => {
 
   reply.code(200).send({ ok: true });
 
-  const events = parseResult.data;
-  const collection = api.mongo.db!.collection("tracks");
-  await collection.insertMany(events, { ordered: false });
+  void api.mongo
+    .db!.collection("tracks")
+    .insertMany(parseResult.data, { ordered: false })
+    .catch(api.log.error);
 });
 
 async function main() {
