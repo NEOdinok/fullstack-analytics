@@ -1,3 +1,8 @@
+// This one is an entry point
+// loads env config
+// Creates Fastify
+// Adds my other plugins: mongo, messages, ws etc
+// listens for HTTP on 3000
 import Fastify from "fastify";
 import { config } from "dotenv";
 import path from "node:path";

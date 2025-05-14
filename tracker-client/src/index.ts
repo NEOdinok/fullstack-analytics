@@ -89,7 +89,14 @@ async function flush() {
     }, flushIntervalMs);
   }
 }
+/*
+  По поводу sendBeacon
+  Beacon API прямо говорит:
+  «User agents must not delay a pending navigation or the unloading of the document when processing this method»
 
+  Он буквально отделает сеть и вкладку.
+  fetch и keepalive можно, но есть подозрение что некоторые браузеры всё равно оборвут запрос,
+*/
 function trackAllBeforePageCloses() {
   window.addEventListener("beforeunload", () => {
     if (buffer.length) navigator.sendBeacon?.(endpoint, JSON.stringify(buffer));

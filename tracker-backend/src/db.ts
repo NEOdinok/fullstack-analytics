@@ -1,3 +1,4 @@
+// Register Fastify mongo plugin
 import fastifyPlugin from "fastify-plugin";
 import fastifyMongo from "@fastify/mongodb";
 import { FastifyInstance } from "fastify";
